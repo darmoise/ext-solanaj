@@ -1,4 +1,4 @@
-# ExtSolanaJ
+# SolanaJ helper
 
 Utilities for **SolanaJ** focused on parsing **Metaplex Core (MPL Core)** NFT transfers.
 
@@ -33,6 +33,7 @@ Utilities for **SolanaJ** focused on parsing **Metaplex Core (MPL Core)** NFT tr
 * Transitive deps: `bitcoinj-core` (Base58), Lombok (compileOnly).
 
 ## Quick start
+
 ```java
 import io.github.darmoise.extsolanaj.core.MplCoreTransferExtractor;
 import io.github.darmoise.extsolanaj.model.Transfer;
