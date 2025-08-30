@@ -33,7 +33,7 @@ public class MplCoreTransferExtractor {
         }
 
         val message = tx.getTransaction().getMessage();
-        val keys    = extractMerged(tx);
+        val keys = extractMerged(tx);
         val memo = extractMemoIfAny(message.getInstructions(), keys);
 
         for (var instr : message.getInstructions()) {
@@ -62,8 +62,8 @@ public class MplCoreTransferExtractor {
             val fromPos = isV1 ? 2 : 1;
 
             val asset = keys.get(assetPos);
-            val to    = keys.get(toPos);
-            val from  = keys.get(fromPos);
+            val to = keys.get(toPos);
+            val from = keys.get(fromPos);
 
             if (!publicKey.toBase58().equals(to)) {
                 continue;
