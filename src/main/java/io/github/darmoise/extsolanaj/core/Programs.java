@@ -6,7 +6,7 @@ import org.p2p.solanaj.core.PublicKey;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Programs {
-    public static final String MPL_CORE = "CoREENx6tW1HoK8ypY1SxRMZTCvVPm7R94rH4PZNhX7d";
+    public static final String MPL_CORE = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d";
     public static final String MEMO_V1 = "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo";
     public static final String MEMO_V2 = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
     public static final String LOG_WRAPPER = "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV";
