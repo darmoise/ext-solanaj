@@ -4,7 +4,6 @@ import io.github.darmoise.extsolanaj.model.Transfer;
 import io.github.darmoise.extsolanaj.utils.ExtBase58;
 import io.github.darmoise.extsolanaj.utils.NumberUtils;
 import io.github.darmoise.extsolanaj.utils.StringUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.bitcoinj.core.Base58;
 import org.p2p.solanaj.core.PublicKey;
@@ -14,20 +13,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.darmoise.extsolanaj.core.Programs.MEMO_V1;
-import static io.github.darmoise.extsolanaj.core.Programs.MEMO_V2;
+import static io.github.darmoise.extsolanaj.core.Programs.isMemoV1;
+import static io.github.darmoise.extsolanaj.core.Programs.isMemoV2;
+import static io.github.darmoise.extsolanaj.core.Programs.isMplCore;
 import static io.github.darmoise.extsolanaj.utils.AccountKeyUtils.extractMerged;
 import static io.github.darmoise.extsolanaj.utils.MplUtils.isTransfer;
 import static io.github.darmoise.extsolanaj.utils.MplUtils.isTransferV1;
 
-@RequiredArgsConstructor
 public class MplCoreTransferExtractor {
-    private final String mplCoreProgramId;
-    private final PublicKey publicKey;
-
-
-    public Optional<Transfer> extractTransfer(final ConfirmedTransaction tx, final String signature) {
-        if (tx.getTransaction() == null) return Optional.empty();
+    public static Optional<Transfer> extractTransfer(
+        final ConfirmedTransaction tx,
+        final String signature,
+        final PublicKey publicKey
+    ) {
+        if (tx.getTransaction() == null) {
+            return Optional.empty();
+        }
 
         val message = tx.getTransaction().getMessage();
         val keys = extractMerged(tx);
@@ -35,7 +36,7 @@ public class MplCoreTransferExtractor {
 
         for (val instr : message.getInstructions()) {
             val programId = getProgramId(instr, keys);
-            if (!mplCoreProgramId.equals(programId)) {
+            if (!isMplCore(programId)) {
                 continue;
             }
 
@@ -83,10 +84,10 @@ public class MplCoreTransferExtractor {
         return Optional.empty();
     }
 
-    private String extractMemoIfAny(List<ConfirmedTransaction.Instruction> ixs, List<String> keys) {
+    private static String extractMemoIfAny(List<ConfirmedTransaction.Instruction> ixs, List<String> keys) {
         for (var i : ixs) {
             String pid = getProgramId(i, keys);
-            if (!MEMO_V1.equals(pid) && !MEMO_V2.equals(pid)) {
+            if (!isMemoV1(pid) && !isMemoV2(pid)) {
                 continue;
             }
 
@@ -98,7 +99,7 @@ public class MplCoreTransferExtractor {
         return null;
     }
 
-    private String getProgramId(
+    private static String getProgramId(
         final ConfirmedTransaction.Instruction instruction,
         final List<String> keys
     ) {
@@ -106,12 +107,12 @@ public class MplCoreTransferExtractor {
         return keys.get(index);
     }
 
-    private boolean hasPositions(List<Integer> acc, int... pos) {
+    private static boolean hasPositions(List<Integer> acc, int... pos) {
         for (int p : pos) if (p < 0 || p >= acc.size()) return false;
         return true;
     }
 
-    private String keyAt(List<String> keys, List<Integer> acc, int pos) {
+    private static String keyAt(List<String> keys, List<Integer> acc, int pos) {
         if (!hasPositions(acc, pos)) return null;
         int k = acc.get(pos);
         if (k < 0 || k >= keys.size()) return null;

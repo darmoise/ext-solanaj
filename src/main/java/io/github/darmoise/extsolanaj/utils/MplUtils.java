@@ -10,8 +10,8 @@ import java.util.Arrays;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MplUtils {
 
-    private static final byte[] IX_TRANSFER = disc("transfer");
-    private static final byte[] IX_TRANSFER_V1 = disc("transfer_v1");
+    public static final byte[] IX_TRANSFER = disc("transfer");
+    public static final byte[] IX_TRANSFER_V1 = disc("transfer_v1");
 
     private static final String DISC_ALGORITHM = "SHA-256";
 

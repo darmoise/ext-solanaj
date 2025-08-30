@@ -17,6 +17,14 @@ public class ByteUtils {
         return true;
     }
 
+
+    public static byte[] concat(byte[] a, byte[] b) {
+        byte[] r = new byte[a.length + b.length];
+        System.arraycopy(a, 0, r, 0, a.length);
+        System.arraycopy(b, 0, r, a.length, b.length);
+        return r;
+    }
+
     public static String nullToEmpty(String s) {
         return s == null ? "" : s;
     }
