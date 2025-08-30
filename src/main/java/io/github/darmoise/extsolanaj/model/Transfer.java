@@ -8,7 +8,7 @@ import lombok.Data;
 public class Transfer {
     private String sender;
     private String recipient;
-    private String nftAddress;
+    private String assetAddress;
     private String reference;
     private String signature;
     private long amount;

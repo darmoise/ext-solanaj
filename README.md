@@ -58,7 +58,7 @@ public class Example {
         Optional<Transfer> incoming = extractor.extractTransfer(tx, myWallet, signature);
 
         incoming.ifPresent(t -> {
-            System.out.println("asset = " + t.getNftAddress());
+            System.out.println("asset = " + t.getAssetAddress());
             System.out.println("from = " + t.getSender());
             System.out.println("to = " + t.getRecipient());
             System.out.println("memo = " + t.getMemo());

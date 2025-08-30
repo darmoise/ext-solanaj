@@ -22,9 +22,9 @@ import static io.github.darmoise.extsolanaj.utils.MplUtils.isTransferV1;
 
 public class MplCoreTransferExtractor {
     public static Optional<Transfer> extractTransfer(
+        final PublicKey publicKey,
         final ConfirmedTransaction tx,
-        final String signature,
-        final PublicKey publicKey
+        final String signature
     ) {
         if (tx.getTransaction() == null) {
             return Optional.empty();
@@ -74,7 +74,7 @@ public class MplCoreTransferExtractor {
 
             return Optional.of(Transfer.builder()
                 .signature(signature)
-                .nftAddress(asset)
+                .assetAddress(asset)
                 .sender(from)
                 .recipient(to)
                 .amount(1)
