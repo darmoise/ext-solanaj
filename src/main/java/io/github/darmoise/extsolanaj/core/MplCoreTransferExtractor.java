@@ -1,6 +1,7 @@
 package io.github.darmoise.extsolanaj.core;
 
 import io.github.darmoise.extsolanaj.model.Transfer;
+import io.github.darmoise.extsolanaj.utils.ExtBase58;
 import io.github.darmoise.extsolanaj.utils.NumberUtils;
 import io.github.darmoise.extsolanaj.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,26 +25,21 @@ public class MplCoreTransferExtractor {
     private final String mplCoreProgramId;
     private final PublicKey publicKey;
 
-    public Optional<Transfer> extractTransfer(
-        final ConfirmedTransaction tx,
-        final String signature
-    ) {
-        if (tx.getTransaction() == null) {
-            return Optional.empty();
-        }
+
+    public Optional<Transfer> extractTransfer(final ConfirmedTransaction tx, final String signature) {
+        if (tx.getTransaction() == null) return Optional.empty();
 
         val message = tx.getTransaction().getMessage();
         val keys = extractMerged(tx);
         val memo = extractMemoIfAny(message.getInstructions(), keys);
 
-        for (var instr : message.getInstructions()) {
+        for (val instr : message.getInstructions()) {
             val programId = getProgramId(instr, keys);
             if (!mplCoreProgramId.equals(programId)) {
                 continue;
             }
 
-            val data = Base58.decode(StringUtils.nullToEmpty(instr.getData()));
-
+            val data = ExtBase58.decode(instr.getData());
             val isV1 = isTransferV1(data);
             val isV0 = !isV1 && isTransfer(data);
 
@@ -55,15 +51,21 @@ public class MplCoreTransferExtractor {
                 .map(NumberUtils::toInt)
                 .toList();
 
-            if (acc.size() < (isV1 ? 5 : 3)) continue;
+            val assetIndex = 0;
+            val toIndex = isV1 ? 4 : 2;
+            val fromIndex = isV1 ? 2 : 1;
 
-            val assetPos = 0;
-            val toPos = isV1 ? 4 : 2;
-            val fromPos = isV1 ? 2 : 1;
+            if (!hasPositions(acc, assetIndex, toIndex, fromIndex)) {
+                continue;
+            }
 
-            val asset = keys.get(assetPos);
-            val to = keys.get(toPos);
-            val from = keys.get(fromPos);
+            val asset = keyAt(keys, acc, assetIndex);
+            val to = keyAt(keys, acc, toIndex);
+            val from = keyAt(keys, acc, fromIndex);
+
+            if (asset == null || to == null) {
+                continue;
+            }
 
             if (!publicKey.toBase58().equals(to)) {
                 continue;
@@ -78,7 +80,6 @@ public class MplCoreTransferExtractor {
                 .reference(memo)
                 .build());
         }
-
         return Optional.empty();
     }
 
@@ -91,7 +92,8 @@ public class MplCoreTransferExtractor {
 
             try {
                 return new String(Base58.decode(StringUtils.nullToEmpty(i.getData())), StandardCharsets.UTF_8);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
@@ -102,5 +104,17 @@ public class MplCoreTransferExtractor {
     ) {
         val index = Long.valueOf(instruction.getProgramIdIndex()).intValue();
         return keys.get(index);
+    }
+
+    private boolean hasPositions(List<Integer> acc, int... pos) {
+        for (int p : pos) if (p < 0 || p >= acc.size()) return false;
+        return true;
+    }
+
+    private String keyAt(List<String> keys, List<Integer> acc, int pos) {
+        if (!hasPositions(acc, pos)) return null;
+        int k = acc.get(pos);
+        if (k < 0 || k >= keys.size()) return null;
+        return keys.get(k);
     }
 }
