@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.darmoise</groupId>
+    <artifactId>ext-solanaj</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>solanaj-helper</name>
+    <description>Helper for SolanaJ</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <solanaj.version>1.23.0</solanaj.version>
+        <lombok.version>1.18.34</lombok.version>
+        <plugin.compiler.version>3.13.0</plugin.compiler.version>
+        <plugin.jar.version>3.4.2</plugin.jar.version>
+        <plugin.source.version>3.3.0</plugin.source.version>
+        <plugin.javadoc.version>3.6.3</plugin.javadoc.version>
+        <plugin.enforcer.version>3.4.1</plugin.enforcer.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mmorrell</groupId>
+            <artifactId>solanaj</artifactId>
+            <version>${solanaj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${plugin.compiler.version}</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${plugin.jar.version}</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>io.github.darmoise.extsolanaj</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${plugin.source.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals><goal>jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${plugin.javadoc.version}</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <additionalJOptions>
+                        <additionalJOption>-Xdoclint:none</additionalJOption>
+                    </additionalJOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals><goal>jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- sanity checks -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${plugin.enforcer.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion><version>[17,)</version></requireJavaVersion>
+                                <requireMavenVersion><version>[3.8.1,)</version></requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/darmoise/solanaj-helper</url>
+        </repository>
+    </distributionManagement>
+</project>

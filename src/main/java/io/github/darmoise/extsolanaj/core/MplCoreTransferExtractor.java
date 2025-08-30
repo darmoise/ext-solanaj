@@ -1,0 +1,106 @@
+package io.github.darmoise.extsolanaj.core;
+
+import io.github.darmoise.extsolanaj.model.Transfer;
+import io.github.darmoise.extsolanaj.utils.NumberUtils;
+import io.github.darmoise.extsolanaj.utils.StringUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.core.PublicKey;
+import org.p2p.solanaj.rpc.types.ConfirmedTransaction;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+
+import static io.github.darmoise.extsolanaj.core.Programs.MEMO_V1;
+import static io.github.darmoise.extsolanaj.core.Programs.MEMO_V2;
+import static io.github.darmoise.extsolanaj.utils.AccountKeyUtils.extractMerged;
+import static io.github.darmoise.extsolanaj.utils.MplUtils.isTransfer;
+import static io.github.darmoise.extsolanaj.utils.MplUtils.isTransferV1;
+
+@RequiredArgsConstructor
+public class MplCoreTransferExtractor {
+    private final String mplCoreProgramId;
+    private final PublicKey publicKey;
+
+    public Optional<Transfer> extractTransfer(
+        final ConfirmedTransaction tx,
+        final String signature
+    ) {
+        if (tx.getTransaction() == null) {
+            return Optional.empty();
+        }
+
+        val message = tx.getTransaction().getMessage();
+        val keys    = extractMerged(tx);
+        val memo = extractMemoIfAny(message.getInstructions(), keys);
+
+        for (var instr : message.getInstructions()) {
+            val programId = getProgramId(instr, keys);
+            if (!mplCoreProgramId.equals(programId)) {
+                continue;
+            }
+
+            val data = Base58.decode(StringUtils.nullToEmpty(instr.getData()));
+
+            val isV1 = isTransferV1(data);
+            val isV0 = !isV1 && isTransfer(data);
+
+            if (!isV0 && !isV1) {
+                continue;
+            }
+
+            val acc = instr.getAccounts().stream()
+                .map(NumberUtils::toInt)
+                .toList();
+
+            if (acc.size() < (isV1 ? 5 : 3)) continue;
+
+            val assetPos = 0;
+            val toPos = isV1 ? 4 : 2;
+            val fromPos = isV1 ? 2 : 1;
+
+            val asset = keys.get(assetPos);
+            val to    = keys.get(toPos);
+            val from  = keys.get(fromPos);
+
+            if (!publicKey.toBase58().equals(to)) {
+                continue;
+            }
+
+            return Optional.of(Transfer.builder()
+                .signature(signature)
+                .nftAddress(asset)
+                .sender(from)
+                .recipient(to)
+                .amount(1)
+                .reference(memo)
+                .build());
+        }
+
+        return Optional.empty();
+    }
+
+    private String extractMemoIfAny(List<ConfirmedTransaction.Instruction> ixs, List<String> keys) {
+        for (var i : ixs) {
+            String pid = getProgramId(i, keys);
+            if (!MEMO_V1.equals(pid) && !MEMO_V2.equals(pid)) {
+                continue;
+            }
+
+            try {
+                return new String(Base58.decode(StringUtils.nullToEmpty(i.getData())), StandardCharsets.UTF_8);
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private String getProgramId(
+        final ConfirmedTransaction.Instruction instruction,
+        final List<String> keys
+    ) {
+        val index = Long.valueOf(instruction.getProgramIdIndex()).intValue();
+        return keys.get(index);
+    }
+}
