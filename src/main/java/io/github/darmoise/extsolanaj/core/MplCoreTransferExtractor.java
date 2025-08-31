@@ -55,14 +55,18 @@ public class MplCoreTransferExtractor {
             val assetIndex = 0;
             val toIndex = isV1 ? 4 : 2;
             val fromIndex = isV1 ? 2 : 1;
+            val collectionIndex = 1;
 
-            if (!hasPositions(acc, assetIndex, toIndex, fromIndex)) {
+            if (!hasPositions(acc, assetIndex, toIndex, fromIndex, collectionIndex)) {
                 continue;
             }
 
             val asset = keyAt(keys, acc, assetIndex);
             val to = keyAt(keys, acc, toIndex);
             val from = keyAt(keys, acc, fromIndex);
+            val collection = isV1
+                ? keyAt(keys, acc, collectionIndex)
+                : null;
 
             if (asset == null || to == null) {
                 continue;
@@ -77,8 +81,8 @@ public class MplCoreTransferExtractor {
                 .assetAddress(asset)
                 .sender(from)
                 .recipient(to)
-                .amount(1)
-                .reference(memo)
+                .collection(collection)
+                .memo(memo)
                 .build());
         }
         return Optional.empty();

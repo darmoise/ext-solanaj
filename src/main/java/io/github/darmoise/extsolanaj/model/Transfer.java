@@ -9,7 +9,8 @@ public class Transfer {
     private String sender;
     private String recipient;
     private String assetAddress;
-    private String reference;
+    private String collection;
     private String signature;
+    private String memo;
     private long amount;
 }
