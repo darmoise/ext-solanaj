@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/darmoise/ext-solanaj.svg)](https://jitpack.io/#darmoise/ext-solanaj)
+
 # SolanaJ helper
 
 Utilities for **SolanaJ** focused on parsing **Metaplex Core (MPL Core)** NFT transfers.
